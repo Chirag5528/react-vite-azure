@@ -1,19 +1,40 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 trigger:
-- main
-
+- master
 pool:
   vmImage: ubuntu-latest
-
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
+- task: NodeTool@0
+  inputs:
+    versionSpec: '18.x'
+  displayName: 'Install Node.js'
+  env:
+    CMS_HOST: 'http://ec2-3-76-42-8.eu-central-1.compute.amazonaws.com:9000'
+    CMS_USERNAME: 'admin@dotcms.com'
+    CMS_PASSWORD: 'admin'
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    npm install
+  displayName: "Install Node"
+- script: |
+    npm run build
+  displayName: "Build Files"
+- script: |
+    npm run dotcms:setDefaultLanguage
+    npm run dotcms:uploadContentTypes
+    npm run dotcms:uploadFiles
+    npm run dotcms:flushCache
+  displayName: "Deploy code"
+- script: |
+    npm run dotcms:uploadPlugins
+    npm run dotcms:flushCache
+  displayName: "Deploy Plugin"
+
+
+
+
+
+
+
